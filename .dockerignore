@@ -5,3 +5,8 @@
 **/*.user
 Dockerfile
 .dockerignore
+**/publish/
+**/.git/
+**/.vs/
+**/*.user
+
