@@ -3,6 +3,7 @@ using EmployeeDirectory.Data;
 using EmployeeDirectory.Repositories;
 using EmployeeDirectory.Services;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +15,11 @@ builder.Services.AddControllersWithViews();
 // "Json"  -> flat JSON file on local disk, no database required at all.
 // Controlled by config key Storage:Provider, i.e. env var Storage__Provider.
 // Defaults to Json so a fresh clone runs with zero external dependencies.
-var storageProvider = builder.Configuration["Storage:Provider"] ?? "Json";
+var storageProvider = builder.Configuration["Storage:Provider"] ;
+if (string.IsNullOrEmpty(storageProvider))
+{
+    throw new InvalidOperationException("Storage:Provider must be configured.");
+}
 var useMySql = storageProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase);
 Console.WriteLine($"[startup] Storage:Provider resolved to '{storageProvider}' (source: appsettings, env vars, or launchSettings — env vars win if both are set)");
 
@@ -66,7 +71,15 @@ builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddScoped<IPhotoStorageService, S3PhotoStorageService>();
 
+builder.Host.UseSerilog((context, config) => config
+    .WriteTo.Console(new Serilog.Formatting.Json.JsonFormatter())
+    .Enrich.FromLogContext());
+
+
+
 var app = builder.Build();
+
+
 
 if (!app.Environment.IsDevelopment())
 {
@@ -96,4 +109,12 @@ app.MapHealthChecks("/healthz/ready", new Microsoft.AspNetCore.Diagnostics.Healt
     Predicate = check => check.Tags.Contains("ready")
 });
 
+app.MapGet("/health", () => Results.Ok(new
+{
+    status = "healthy",
+    timestamp = DateTime.UtcNow
+}));
+
+
 app.Run();
+
