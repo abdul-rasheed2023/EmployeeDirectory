@@ -486,3 +486,4 @@ publish/
 appsettings.Development.json
 Certificates/
 *.crt
+docker-compose.override.yml

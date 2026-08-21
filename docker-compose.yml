@@ -9,25 +9,35 @@ services:
     environment:
       Storage__Provider: ${STORAGE_PROVIDER:-Json}
       ConnectionStrings__Default: ${CONNECTION_STRING:-}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - appnet
 
   mysql:
     image: mysql:8.4.11
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword123
-      MYSQL_DATABASE: employeedirectory
-      MYSQL_USER: appuser
-      MYSQL_PASSWORD: devpassword123
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-employeedirectory}
+      MYSQL_USER: ${MYSQL_USER:-appuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword123"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 5s
       timeout: 5s
       retries: 10
       start_period: 20s
-    profiles: ["mysql"]
+    networks:
+      - appnet
+
+networks:
+  appnet:
+    driver: bridge
 
 volumes:
   mysql-data:
