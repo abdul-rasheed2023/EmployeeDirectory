@@ -1,0 +1,32 @@
+@model IEnumerable<Employee>
+
+<h1>Employees</h1>
+<p><a class="btn" href="@Url.Action("Create")">+ Add employee</a></p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Department</th>
+            <th>Added</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var e in Model)
+    {
+        <tr>
+            <td>@e.FirstName @e.LastName</td>
+            <td>@e.Email</td>
+            <td>@e.Department</td>
+            <td>@e.CreatedAtUtc.ToString("yyyy-MM-dd")</td>
+            <td class="actions">
+                <a href="@Url.Action("Details", new { id = e.Id })">View</a>
+                <a href="@Url.Action("Edit", new { id = e.Id })">Edit</a>
+                <a href="@Url.Action("Delete", new { id = e.Id })">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

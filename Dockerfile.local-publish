@@ -1,0 +1,23 @@
+
+# ==============================================================================
+# Single-stage: copies an ALREADY-PUBLISHED app.
+# Run `dotnet publish -c Release -o ./publish` on your host machine first
+# (where NuGet access already works) — this avoids needing NuGet/network
+# access inside the Docker build at all.
+# ==============================================================================
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+
+RUN useradd -u 1001 -m appuser \
+    && mkdir -p /app/App_Data \
+    && chown -R appuser:appuser /app
+
+USER appuser
+
+COPY --chown=appuser:appuser ./publish .
+
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+ENTRYPOINT ["dotnet", "EmployeeDirectory.dll"]

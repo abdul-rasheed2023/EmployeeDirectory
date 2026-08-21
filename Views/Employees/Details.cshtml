@@ -1,0 +1,16 @@
+@model Employee
+
+<h1>@Model.FirstName @Model.LastName</h1>
+
+@if (ViewBag.PhotoUrl is not null)
+{
+    <img src="@ViewBag.PhotoUrl" alt="Employee photo" style="max-width:200px;border-radius:6px;margin-bottom:16px;" />
+}
+
+<table>
+    <tr><th>Email</th><td>@Model.Email</td></tr>
+    <tr><th>Department</th><td>@Model.Department</td></tr>
+    <tr><th>Added</th><td>@Model.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm") UTC</td></tr>
+</table>
+
+<p><a class="btn-link" href="@Url.Action("Index")">&larr; Back to list</a></p>

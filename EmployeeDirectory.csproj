@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>employee-directory-eks-demo</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Certificates\**" />
+    <Compile Remove="publish\**" />
+    <Content Remove="Certificates\**" />
+    <Content Remove="publish\**" />
+    <EmbeddedResource Remove="Certificates\**" />
+    <EmbeddedResource Remove="publish\**" />
+    <None Remove="Certificates\**" />
+    <None Remove="publish\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- EF Core + MySQL (Pomelo is the community provider Amazon RDS MySQL guides commonly point to) -->
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
+    <!-- S3 upload for employee photos -->
+    <PackageReference Include="AWSSDK.S3" Version="3.7.400.19" />
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.301" />
+
+    <!-- Health checks used by k8s liveness/readiness probes -->
+    <PackageReference Include="AspNetCore.HealthChecks.MySql" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="deploy\" />
+    <Folder Include="docs\" />
+    <Folder Include="terraform\" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,27 @@
+@model Employee
+
+<h1>Add employee</h1>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+
+    <label asp-for="FirstName">First name</label>
+    <input asp-for="FirstName" type="text" />
+
+    <label asp-for="LastName">Last name</label>
+    <input asp-for="LastName" type="text" />
+
+    <label asp-for="Email">Email</label>
+    <input asp-for="Email" type="email" />
+
+    <label asp-for="Department">Department</label>
+    <input asp-for="Department" type="text" />
+
+    <label for="photo">Photo</label>
+    <input type="file" name="photo" id="photo" accept="image/*" />
+
+    <div>
+        <button type="submit">Save</button>
+        <a class="btn-link" href="@Url.Action("Index")">Cancel</a>
+    </div>
+</form>

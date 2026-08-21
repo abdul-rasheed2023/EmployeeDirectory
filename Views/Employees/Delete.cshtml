@@ -1,0 +1,11 @@
+@model Employee
+
+<h1>Delete employee?</h1>
+<p>This will permanently remove <strong>@Model.FirstName @Model.LastName</strong> (@Model.Email).</p>
+
+<form asp-action="Delete" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <button type="submit">Confirm delete</button>
+    <a class="btn-link" href="@Url.Action("Index")">Cancel</a>
+</form>
