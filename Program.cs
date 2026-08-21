@@ -98,13 +98,13 @@ app.MapControllerRoute(
 
 // Liveness: is the process up? No dependency checks — a DB blip shouldn't
 // cause k8s to kill and restart a perfectly healthy pod.
-app.MapHealthChecks("/healthz/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
 {
     Predicate = _ => false
 });
 
 // Readiness: can this pod actually serve traffic right now?
-app.MapHealthChecks("/healthz/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
 {
     Predicate = check => check.Tags.Contains("ready")
 });
