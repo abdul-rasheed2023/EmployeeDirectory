@@ -3,6 +3,7 @@ using EmployeeDirectory.Data;
 using EmployeeDirectory.Repositories;
 using EmployeeDirectory.Services;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +16,7 @@ builder.Services.AddControllersWithViews();
 // "Json"  -> flat JSON file on local disk, no database required at all.
 // Controlled by config key Storage:Provider, i.e. env var Storage__Provider.
 // Defaults to Json so a fresh clone runs with zero external dependencies.
-var storageProvider = builder.Configuration["Storage:Provider"] ;
+var storageProvider = builder.Configuration["Storage:Provider"];
 if (string.IsNullOrEmpty(storageProvider))
 {
     throw new InvalidOperationException("Storage:Provider must be configured.");
@@ -23,26 +24,22 @@ if (string.IsNullOrEmpty(storageProvider))
 var useMySql = storageProvider.Equals("MySql", StringComparison.OrdinalIgnoreCase);
 Console.WriteLine($"[startup] Storage:Provider resolved to '{storageProvider}' (source: appsettings, env vars, or launchSettings — env vars win if both are set)");
 
+string? connectionString = null;
+
 if (useMySql)
 {
-    var connectionString = builder.Configuration.GetConnectionString("Default")
+    connectionString = builder.Configuration.GetConnectionString("Default")
         ?? throw new InvalidOperationException(
             "Storage:Provider is 'MySql' but ConnectionStrings:Default is not configured.");
 
-    try
-    {
-        builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
-    }
-    catch (Exception ex)
-    {
-        throw new InvalidOperationException(
-            "Storage:Provider is 'MySql' but couldn't reach the database to detect its version. " +
-            "Either start MySQL (docker compose --profile mysql up) or switch back to " +
-            "Storage:Provider=Json for local dev without a database. " +
-            "See Program.cs startup log above for which provider was actually resolved.",
-            ex);
-    }
+    // NOTE: ServerVersion.AutoDetect is intentionally NOT called here.
+    // AddDbContext registers this lambda lazily — it only runs when AppDbContext
+    // is first resolved from DI, which happens on the first incoming request,
+    // not at startup. A try/catch here would never fire. Real connectivity
+    // verification happens after app.Build(), below, where it actually runs
+    // at startup and can be caught.
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 4, 11))));
 
     builder.Services.AddScoped<IEmployeeRepository, EfEmployeeRepository>();
 
@@ -75,12 +72,61 @@ builder.Host.UseSerilog((context, config) => config
     .WriteTo.Console(new Serilog.Formatting.Json.JsonFormatter())
     .Enrich.FromLogContext());
 
-
-
 var app = builder.Build();
 
+// --- Startup connectivity check (MySql only) ---
+// Verifies the database is reachable before the app starts serving traffic.
+// Deliberately does NOT run migrations here — schema changes are a separate,
+// explicit step (`dotnet ef database update`, or a one-shot Job/CI step in
+// EKS), not something every replica does on boot. This block only answers
+// "can I connect", nothing more.
+if (useMySql)
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
+    const int maxRetries = 6;
+    const int delaySeconds = 5;
 
+    for (int i = 1; i <= maxRetries; i++)
+    {
+        try
+        {
+            Console.WriteLine($"[startup] Verifying database connectivity (Attempt {i}/{maxRetries})...");
+            var canConnect = await db.Database.CanConnectAsync();
+            if (canConnect)
+            {
+                Console.WriteLine("[startup] Database connectivity confirmed.");
+                break;
+            }
+
+            Console.WriteLine($"[startup] Database not reachable yet (attempt {i}/{maxRetries}).");
+            if (i == maxRetries)
+            {
+                throw new InvalidOperationException(
+                    "Storage:Provider is 'MySql' but the database was not reachable after multiple attempts. " +
+                    "Either start MySQL (docker compose --profile mysql up) or switch back to " +
+                    "Storage:Provider=Json for local dev without a database.");
+            }
+            await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+        }
+        catch (MySqlException ex) when (i < maxRetries)
+        {
+            Console.WriteLine($"[startup] Database not ready yet. Retrying in {delaySeconds}s... ({ex.Message})");
+            await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+        }
+        catch (MySqlException ex)
+        {
+            throw new InvalidOperationException(
+                "Storage:Provider is 'MySql' but couldn't reach the database after multiple attempts. " +
+                "Either start MySQL (docker compose --profile mysql up) or switch back to " +
+                "Storage:Provider=Json for local dev without a database. " +
+                "If the database IS reachable, check whether migrations have been applied: " +
+                "dotnet ef database update.",
+                ex);
+        }
+    }
+}
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -115,6 +161,4 @@ app.MapGet("/health", () => Results.Ok(new
     timestamp = DateTime.UtcNow
 }));
 
-
 app.Run();
-
