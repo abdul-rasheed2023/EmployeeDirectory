@@ -1,19 +1,66 @@
-## About This Project
+# Employee Directory
 
-Employee Directory — an ASP.NET Core MVC application built as a portfolio 
-project demonstrating containerization, CI/CD, and infrastructure-as-code 
-through to AWS EKS.
+## What this app is
 
-**Current state:** Local development app with an `IEmployeeRepository` 
-abstraction. Both `JsonEmployeeRepository` (local dev) and 
-`EfEmployeeRepository` (MySQL, EF Core) are implemented; the EF/MySQL path 
-is being verified against Docker Compose. Photo storage is abstracted 
-behind `IPhotoStorageService`, with an S3-backed implementation in place.
+A .NET employee directory application. Originally built against a local JSON-file repository, now being migrated toward a cloud-ready architecture using EF Core + MySQL, containerized with Docker.
 
-**Target architecture:** Local Docker Compose (app + MySQL) evolving to 
-Terraform-provisioned AWS infrastructure (VPC, ECR, RDS) and finally an 
-EKS deployment with CI/CD via GitHub Actions.
+## Current architecture state
 
-**Repository conventions:** each milestone is tagged as a GitHub release 
-(`vX.Y.0`) with architecture notes, verification steps, and known 
-limitations documented in `/docs/adr` and `/docs/runbooks`.
+- **API layer:** .NET app exposing employee directory endpoints, plus a `/healthz` liveness endpoint (process-alive check only — does not currently verify DB connectivity; this is a deliberate scope decision, not a gap — see `/docs/runbooks/db-failure-recovery.md`).
+- **Data layer:** `IEmployeeRepository` abstraction — local JSON-backed implementation for dev, EF Core/MySQL-backed implementation for containerized/cloud use. See `/docs/adr/0001-repository-abstraction.md`.
+- **Logging:** structured logging (JSON output) on startup config and unhandled exceptions.
+- **Config validation:** app fails fast at startup with a readable error if required configuration is missing.
+- **Containerization:**
+  - Multi-stage Dockerfile (build stage vs. slim runtime stage), runs as non-root (`USER appuser`).
+  - Deterministic image tagging by short git SHA.
+  - OCI image labels (`revision`, `version`, `source`).
+  - `HEALTHCHECK` instruction against `/healthz`.
+- **Local orchestration:** `docker-compose.yml` (app + MySQL) split into a base file plus `docker-compose.override.yml` for local secrets/env, with app and DB on an explicit named network (not the default bridge). `depends_on: condition: service_healthy` ensures the app doesn't race MySQL on startup.
+- **Caching:** no cache layer (e.g. Redis) in scope — documented as a deferred decision given the app's read-heavy, low-write profile. See `/docs/adr/0002-caching-decision.md`.
+- **Known behavior under DB failure:** app currently crashes if MySQL becomes unreachable mid-run and self-recovers without a restart once MySQL returns; no EF Core retry-on-failure is configured. Full details in `/docs/runbooks/db-failure-recovery.md`.
+
+## How to run locally
+
+**Prerequisites:** Docker and Docker Compose installed.
+
+```bash
+# Clone the repo
+git clone https://github.com/abdul-rasheed2023/EmployeeDirectory.git
+cd EmployeeDirectory
+
+# Bring up the app + MySQL
+docker compose up
+```
+
+The app will be available at `http://localhost:8080`. MySQL data persists across restarts via a named Docker volume.
+
+To confirm it's running:
+
+```bash
+curl localhost:8080/healthz
+# expect: 200 with a small JSON payload (status, timestamp)
+```
+
+To stop and remove the stack:
+
+```bash
+docker compose down
+```
+
+Local secrets (e.g. DB password) live in `docker-compose.override.yml`, which is **not committed to git**. No secrets are present in the base `docker-compose.yml`.
+
+## Repository layout
+
+```
+/src              application source
+/tests            test suite
+/deploy           deployment-related config
+/terraform        infrastructure as code (Month 3+)
+/docs/adr         architecture decision records
+/docs/runbooks    operational runbooks (failures, incidents, recovery steps)
+/.github/workflows CI/CD pipelines (Month 2+)
+```
+
+## Status
+
+Month 1 (Docker hardening) complete as of this README update. See `/docs/adr` and `/docs/runbooks` for the decisions and observed behavior behind the choices above. Month 2 (CI/CD) and Month 3 (Terraform) tracked separately — this document reflects app + container state only.
