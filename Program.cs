@@ -162,3 +162,6 @@ app.MapGet("/health", () => Results.Ok(new
 }));
 
 app.Run();
+
+// Expose Program for WebApplicationFactory in integration tests (top-level statements)
+public partial class Program { }

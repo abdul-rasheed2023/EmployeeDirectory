@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>employee-directory-eks-demo</UserSecretsId>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +17,10 @@
     <EmbeddedResource Remove="publish\**" />
     <None Remove="Certificates\**" />
     <None Remove="publish\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Tests\UnitTest1.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,12 +38,17 @@
     <!-- Health checks used by k8s liveness/readiness probes -->
     <PackageReference Include="AspNetCore.HealthChecks.MySql" Version="8.0.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="xunit.extensibility.core" Version="2.9.3" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="deploy\" />
     <Folder Include="docs\" />
     <Folder Include="terraform\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="EmployeeDirectory.Tests\EmployeeDirectory.Tests.csproj" />
   </ItemGroup>
 
 </Project>
