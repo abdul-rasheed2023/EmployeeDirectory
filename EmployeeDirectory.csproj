@@ -41,7 +41,7 @@
     </PackageReference>
 
     <!-- S3 upload for employee photos -->
-    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.301" />
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.101" />
 
     <!-- Health checks used by k8s liveness/readiness probes -->
     <PackageReference Include="AspNetCore.HealthChecks.MySql" Version="8.0.1" />
