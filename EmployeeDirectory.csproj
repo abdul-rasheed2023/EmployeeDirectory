@@ -10,12 +10,20 @@
 
   <ItemGroup>
     <Compile Remove="Certificates\**" />
+    <Compile Remove="EmployeeDirectory.Tests\**" />
+    <Compile Remove="EmployeeDirectory.Test\**" />
     <Compile Remove="publish\**" />
     <Content Remove="Certificates\**" />
+    <Content Remove="EmployeeDirectory.Tests\**" />
+    <Content Remove="EmployeeDirectory.Test\**" />
     <Content Remove="publish\**" />
     <EmbeddedResource Remove="Certificates\**" />
+    <EmbeddedResource Remove="EmployeeDirectory.Tests\**" />
+    <EmbeddedResource Remove="EmployeeDirectory.Test\**" />
     <EmbeddedResource Remove="publish\**" />
     <None Remove="Certificates\**" />
+    <None Remove="EmployeeDirectory.Tests\**" />
+    <None Remove="EmployeeDirectory.Test\**" />
     <None Remove="publish\**" />
   </ItemGroup>
 
@@ -45,10 +53,6 @@
     <Folder Include="deploy\" />
     <Folder Include="docs\" />
     <Folder Include="terraform\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="EmployeeDirectory.Tests\EmployeeDirectory.Tests.csproj" />
   </ItemGroup>
 
 </Project>
