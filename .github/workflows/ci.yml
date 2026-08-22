@@ -42,4 +42,4 @@ jobs:
           path: coverage/
               
       - name: Verify Code Formatting
-        run: dotnet format EmployeeDirectory.Test/EmployeeDirectory.Test.csproj --verify-no-changes --verbosity normal
+        run: dotnet format EmployeeDirectory.slnx --verify-no-changes --verbosity normal
