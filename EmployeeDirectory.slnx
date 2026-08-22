@@ -1,4 +1,7 @@
 <Solution>
   <Project Path="EmployeeDirectory.Test\EmployeeDirectory.Test.csproj" Id="42e79a68-5ef6-41f7-919e-e001520ec235" />
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
   <Project Path="EmployeeDirectory.csproj" />
 </Solution>

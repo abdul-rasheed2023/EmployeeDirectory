@@ -26,11 +26,11 @@
       },
       "AWSSDK.S3": {
         "type": "Direct",
-        "requested": "[3.7.400.19, )",
-        "resolved": "3.7.401",
-        "contentHash": "G2fhk2FCOMp5Jv72GnvQMCgIhgNEkZK+yiLpG/ZCxp67wZ8+YDsB5ogc4C4a2olUuiCCRnUWiCFlFHzkpZMvIw==",
+        "requested": "[4.0.102.3, )",
+        "resolved": "4.0.102.3",
+        "contentHash": "3UBPFahEW62lNqHutA94if/9YguOXswDkz+CMh8fo3qCl7PUdynwSEvE0rhHnRPok0rDkDEDpwddfk7h8Mg0gw==",
         "dependencies": {
-          "AWSSDK.Core": "[3.7.400.6, 4.0.0)"
+          "AWSSDK.Core": "[4.0.102, 5.0.0)"
         }
       },
       "Microsoft.EntityFrameworkCore.Design": {
@@ -82,8 +82,8 @@
       },
       "AWSSDK.Core": {
         "type": "Transitive",
-        "resolved": "3.7.400.6",
-        "contentHash": "njy8/xeyeQTSRWxXPkOSnedqf4dkXV2MEOPespul8AOhEBCkJTW/E65Wkh8q2PgqCXKeWMa30E+EpU93jg4DIg=="
+        "resolved": "4.0.102",
+        "contentHash": "sjkYreyNPlYTnAxdnqd3MBoeTNZHXOzV9lKULS5VAn+6MJIqu87aZLlm56KhDANOBXRxwDJIW668ZlsFhaB6Zw=="
       },
       "Humanizer.Core": {
         "type": "Transitive",

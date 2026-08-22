@@ -12,7 +12,7 @@ namespace EmployeeDirectory.Test
 {
     public class HealthEndpointTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
     {
-        private HttpClient _client;
+        private HttpClient? _client;
         private string _tempFile;
 
         public HealthEndpointTests(WebApplicationFactory<Program> factory)
@@ -39,7 +39,9 @@ namespace EmployeeDirectory.Test
         [Fact]
         public async Task Health_ReturnsOk()
         {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var response = await _client.GetAsync("/health");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             response.EnsureSuccessStatusCode();
         }
 
