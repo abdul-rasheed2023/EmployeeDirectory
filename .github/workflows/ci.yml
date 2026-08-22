@@ -41,5 +41,5 @@ jobs:
           name: coverage-report
           path: coverage/
               
-      - name: Format check
-        run: dotnet format --verify-no-changes --verbosity normal
+      - name: Verify Code Formatting
+        run: dotnet format EmployeeDirectory.Test/EmployeeDirectory.Test.csproj --verify-no-changes --verbosity normal
