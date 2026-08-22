@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 // --- MVC ---
 builder.Services.AddControllersWithViews();
 
-// --- Storage provider switch ---
+// ---  Storage provider switch  ---
 // "MySql" -> EF Core against RDS/MySQL (what actually runs in EKS).
 // "Json"  -> flat JSON file on local disk, no database required at all.
 // Controlled by config key Storage:Provider, i.e. env var Storage__Provider.
