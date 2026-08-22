@@ -38,7 +38,8 @@ public class S3PhotoStorageService : IPhotoStorageService
         await _s3.PutObjectAsync(request, ct);
         _logger.LogInformation("Uploaded photo to s3://{Bucket}/{Key}", _bucketName, objectKey);
 
-        return objectKey;}
+        return objectKey;
+    }
 
     public string GetPresignedUrl(string objectKey)
     {
