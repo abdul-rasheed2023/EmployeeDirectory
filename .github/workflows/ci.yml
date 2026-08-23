@@ -43,3 +43,11 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t employee-directory:${{ github.sha }} .
+
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: 'employee-directory:${{ github.sha }}'
+          format: 'table'
+          severity: 'CRITICAL'
+          exit-code: '1'
