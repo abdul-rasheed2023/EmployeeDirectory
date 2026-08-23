@@ -5,17 +5,26 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>employee-directory-eks-demo</UserSecretsId>
+	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="Certificates\**" />
+    <Compile Remove="EmployeeDirectory.Tests\**" />
+    <Compile Remove="EmployeeDirectory.Test\**" />
     <Compile Remove="publish\**" />
     <Content Remove="Certificates\**" />
+    <Content Remove="EmployeeDirectory.Tests\**" />
+    <Content Remove="EmployeeDirectory.Test\**" />
     <Content Remove="publish\**" />
     <EmbeddedResource Remove="Certificates\**" />
+    <EmbeddedResource Remove="EmployeeDirectory.Tests\**" />
+    <EmbeddedResource Remove="EmployeeDirectory.Test\**" />
     <EmbeddedResource Remove="publish\**" />
     <None Remove="Certificates\**" />
+    <None Remove="EmployeeDirectory.Tests\**" />
+    <None Remove="EmployeeDirectory.Test\**" />
     <None Remove="publish\**" />
   </ItemGroup>
 
@@ -25,6 +34,7 @@
 
   <ItemGroup>
     <!-- EF Core + MySQL (Pomelo is the community provider Amazon RDS MySQL guides commonly point to) -->
+    <PackageReference Include="AWSSDK.S3" Version="4.0.102.3" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
       <PrivateAssets>all</PrivateAssets>
@@ -32,8 +42,7 @@
     </PackageReference>
 
     <!-- S3 upload for employee photos -->
-    <PackageReference Include="AWSSDK.S3" Version="3.7.400.19" />
-    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.301" />
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.101" />
 
     <!-- Health checks used by k8s liveness/readiness probes -->
     <PackageReference Include="AspNetCore.HealthChecks.MySql" Version="8.0.1" />
@@ -45,10 +54,6 @@
     <Folder Include="deploy\" />
     <Folder Include="docs\" />
     <Folder Include="terraform\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="EmployeeDirectory.Tests\EmployeeDirectory.Tests.csproj" />
   </ItemGroup>
 
 </Project>
