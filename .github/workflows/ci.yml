@@ -17,15 +17,12 @@ jobs:
         with:
           dotnet-version: '8.0.x'
           cache: true
-          
+
       - name: Restore
         run: dotnet restore --locked-mode
 
       - name: Build
         run: dotnet build --no-restore --configuration Release
-
-      - name: Test
-        run: dotnet test --no-build --configuration Release --logger "console;verbosity=normal"
 
       - name: Test with coverage
         run: |
@@ -40,6 +37,9 @@ jobs:
         with:
           name: coverage-report
           path: coverage/
-              
+
       - name: Verify Code Formatting
-        run: dotnet format EmployeeDirectory.Test/EmployeeDirectory.Test.csproj --verify-no-changes --verbosity normal
+        run: dotnet format EmployeeDirectory.slnx --verify-no-changes --verbosity normal
+
+      - name: Build Docker image
+        run: docker build -t employee-directory:${{ github.sha }} .
