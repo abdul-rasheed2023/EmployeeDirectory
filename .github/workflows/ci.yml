@@ -9,7 +9,6 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -17,15 +16,12 @@ jobs:
         with:
           dotnet-version: '8.0.x'
           cache: true
-          
+
       - name: Restore
         run: dotnet restore --locked-mode
 
       - name: Build
         run: dotnet build --no-restore --configuration Release
-
-      - name: Test
-        run: dotnet test --no-build --configuration Release --logger "console;verbosity=normal"
 
       - name: Test with coverage
         run: |
@@ -40,6 +36,25 @@ jobs:
         with:
           name: coverage-report
           path: coverage/
-              
+
       - name: Verify Code Formatting
         run: dotnet format EmployeeDirectory.slnx --verify-no-changes --verbosity normal
+
+      - name: Build Docker image
+        run: docker build -t employee-directory:${{ github.sha }} .
+
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: 'employee-directory:${{ github.sha }}'
+          format: 'table'
+          severity: 'CRITICAL'
+          exit-code: '1'
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Deploy placeholder
+        run: echo "Deploying image employee-directory:${{ github.sha }} — no real target yet, this is the CD skeleton gate"
