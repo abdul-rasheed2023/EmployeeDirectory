@@ -1,0 +1,17 @@
+# Copy this file to dev.tfvars and fill in real values.
+# dev.tfvars is gitignored — never commit real secrets.
+
+aws_region   = "us-east-1"
+environment  = "dev"
+project_name = "mno-group"
+
+# Required — no defaults on purpose
+notification_email  = "you@example.com"
+
+# db_password removed — RDS master credential is now managed by AWS Secrets
+# Manager (manage_master_user_password = true), auto-generated and rotatable.
+# Retrieve it at runtime:
+#   aws secretsmanager get-secret-value --secret-id <rds_master_user_secret_arn output>
+
+# Optional — lock SSH down to your own IP instead of 0.0.0.0/0
+# my_ip = "203.0.113.50/32"
