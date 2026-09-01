@@ -139,7 +139,7 @@ terraform init       # migrates local state to S3 when prompted
 terraform plan -var-file="dev.tfvars"
 terraform apply -var-file="dev.tfvars"
 terraform destroy -var-file="dev.tfvars"   # tear down when done — see cost notes below
-```
+````
 
 ## Cost notes
 
