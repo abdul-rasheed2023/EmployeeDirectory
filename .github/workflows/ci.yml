@@ -55,6 +55,11 @@ jobs:
           severity: 'CRITICAL'
           exit-code: '1'
 
+      - name: Debug GitHub Context
+        run: |
+          echo "Repository=${{ github.repository }}"
+          echo "Ref=${{ github.ref }}"
+
       - name: Configure AWS credentials via OIDC
         if: github.event_name == 'push'
         uses: aws-actions/configure-aws-credentials@v4
