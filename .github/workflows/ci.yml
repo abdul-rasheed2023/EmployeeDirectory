@@ -6,10 +6,13 @@ on:
   pull_request:
     branches: [main, dev]
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -17,15 +20,12 @@ jobs:
         with:
           dotnet-version: '8.0.x'
           cache: true
-          
+
       - name: Restore
         run: dotnet restore --locked-mode
 
       - name: Build
         run: dotnet build --no-restore --configuration Release
-
-      - name: Test
-        run: dotnet test --no-build --configuration Release --logger "console;verbosity=normal"
 
       - name: Test with coverage
         run: |
@@ -40,6 +40,47 @@ jobs:
         with:
           name: coverage-report
           path: coverage/
-              
+
       - name: Verify Code Formatting
         run: dotnet format EmployeeDirectory.slnx --verify-no-changes --verbosity normal
+
+      - name: Build Docker image
+        run: docker build -t employee-directory:${{ github.sha }} .
+
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: 'employee-directory:${{ github.sha }}'
+          format: 'table'
+          severity: 'CRITICAL'
+          exit-code: '1'
+
+      - name: Debug GitHub Context
+        run: |
+          echo "Repository=${{ github.repository }}"
+          echo "Ref=${{ github.ref }}"
+
+      - name: Configure AWS credentials via OIDC
+        if: github.event_name == 'push'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Login to ECR
+        if: github.event_name == 'push'
+        run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 986948598853.dkr.ecr.us-east-1.amazonaws.com
+
+      - name: Tag and push image
+        if: github.event_name == 'push'
+        run: |
+          docker tag employee-directory:${{ github.sha }} 986948598853.dkr.ecr.us-east-1.amazonaws.com/mno-group-dev-employee-directory:${{ github.sha }}
+          docker push 986948598853.dkr.ecr.us-east-1.amazonaws.com/mno-group-dev-employee-directory:${{ github.sha }}
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - name: Deploy placeholder
+        run: echo "Deploying image employee-directory:${{ github.sha }} — no real target yet, this is the CD skeleton gate"
