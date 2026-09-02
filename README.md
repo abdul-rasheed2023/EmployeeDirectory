@@ -51,7 +51,7 @@ Local secrets (e.g. DB password) live in `docker-compose.override.yml`, which is
 
 ## Repository layout
 
-```
+````
 /src              application source
 /tests            test suite
 /deploy           deployment-related config
