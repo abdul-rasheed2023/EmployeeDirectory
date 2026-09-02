@@ -22,9 +22,12 @@ data "aws_iam_openid_connect_provider" "github" {
 
 locals {
   oidc_provider_arn = var.create_oidc_provider ? aws_iam_openid_connect_provider.github[0].arn : data.aws_iam_openid_connect_provider.github[0].arn
-
+  
   # sub claim format: repo:ORG/REPO:ref:refs/heads/BRANCH
-  allowed_subs = [for ref in var.allowed_branch_refs : "repo:${var.github_org}/${var.github_repo}:ref:${ref}"]
+  
+# sub claim format (immutable, GitHub default since July 2026):
+  # repo:ORG@ORG_ID/REPO@REPO_ID:ref:refs/heads/BRANCH
+  allowed_subs = [for ref in var.allowed_branch_refs : "repo:${var.github_org}@${var.github_org_id}/${var.github_repo}@${var.github_repo_id}:ref:${ref}"]
 }
 
 data "aws_iam_policy_document" "trust" {

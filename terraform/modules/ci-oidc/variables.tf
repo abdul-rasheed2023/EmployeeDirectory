@@ -30,3 +30,14 @@ variable "create_oidc_provider" {
   type        = bool
   default     = true
 }
+variable "github_org_id" {
+  description = "Immutable numeric ID of the GitHub org/owner (from OIDC sub claim)"
+  type        = string
+  default     = "148262269"
+}
+
+variable "github_repo_id" {
+  description = "Immutable numeric ID of the GitHub repository (from OIDC sub claim)"
+  type        = string
+  default     = "1341415007"
+}
