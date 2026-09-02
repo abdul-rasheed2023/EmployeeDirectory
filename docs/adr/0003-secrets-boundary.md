@@ -41,12 +41,6 @@ commit).
   application secret — it lives in the IAM role trust policy and the
   workflow's `permissions:` block, never as a stored credential anywhere.
 
-**`App_Data` JSON storage** (the local file-based storage path built for
-the Day 14 health test): treated as ephemeral, local/dev-only application
-state — not a secrets concern. It is expected to be replaced by RDS in
-Month 4; nothing secret is stored in it, and it is not part of this
-boundary.
-
 ## Consequences
 - No secret value is ever committed to the repo or baked into a Docker
   image layer.
@@ -57,6 +51,9 @@ boundary.
 - When RDS and Secrets Manager are provisioned in Month 4, the app will
   read connection strings via the AWS SDK / `Microsoft.Extensions.Configuration.AWS`
   Secrets Manager provider at startup — not hand-rolled retrieval code.
+- Secrets Manager's automatic rotation will be enabled for RDS credentials
+  once provisioned in Month 4 — rotation strategy to be documented in
+  ADR 0007 (RDS provisioning).
 - IAM roles (not access keys) are the access mechanism for both CI (OIDC)
   and the running application (IRSA once on EKS, Month 6) — consistent
   with the AWS Solutions Architect Professional practices this project is
