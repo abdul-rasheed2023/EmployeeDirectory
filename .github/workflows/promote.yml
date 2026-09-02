@@ -1,0 +1,82 @@
+name: Promote Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_tag:
+        description: 'Source image tag to promote (commit SHA from a passing CI run)'
+        required: true
+        type: string
+      target_environment:
+        description: 'Target environment to promote to'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  promote:
+    name: Retag and promote ${{ inputs.source_tag }} → ${{ inputs.target_environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target_environment == 'production' && 'Production' || 'Staging' }}
+
+    env:
+      ECR_REGISTRY: 986948598853.dkr.ecr.us-east-1.amazonaws.com
+      ECR_REPOSITORY: mno-group-dev-employee-directory
+      SOURCE_TAG: ${{ inputs.source_tag }}
+      TARGET_TAG: ${{ inputs.target_environment }}-latest
+
+    steps:
+      - name: Validate source tag is not empty
+        run: |
+          if [ -z "$SOURCE_TAG" ]; then
+            echo "ERROR: source_tag input is required and must be a valid commit SHA."
+            exit 1
+          fi
+          echo "Promoting image: $ECR_REGISTRY/$ECR_REPOSITORY:$SOURCE_TAG"
+          echo "Target tag:      $ECR_REGISTRY/$ECR_REPOSITORY:$TARGET_TAG"
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 \
+            | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+      - name: Pull source image
+        run: |
+          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$SOURCE_TAG
+
+      - name: Retag for target environment
+        # This is the core of the immutable promotion pattern:
+        # we never rebuild — we retag an already-built, already-scanned image.
+        run: |
+          docker tag \
+            $ECR_REGISTRY/$ECR_REPOSITORY:$SOURCE_TAG \
+            $ECR_REGISTRY/$ECR_REPOSITORY:$TARGET_TAG
+
+      - name: Push promoted image tag
+        run: |
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TARGET_TAG
+
+      - name: Summary
+        run: |
+          echo "### Promotion complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| Source tag | \`$SOURCE_TAG\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Target tag | \`$TARGET_TAG\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ inputs.target_environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Registry | \`$ECR_REGISTRY/$ECR_REPOSITORY\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Image was **not rebuilt** — same bits, same scan result, new tag." >> $GITHUB_STEP_SUMMARY
