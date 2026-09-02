@@ -61,18 +61,18 @@ jobs:
           echo "Ref=${{ github.ref }}"
 
       - name: Configure AWS credentials via OIDC
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_OIDC_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Login to ECR
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 986948598853.dkr.ecr.us-east-1.amazonaws.com
 
       - name: Tag and push image
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           docker tag employee-directory:${{ github.sha }} 986948598853.dkr.ecr.us-east-1.amazonaws.com/mno-group-dev-employee-directory:${{ github.sha }}
           docker push 986948598853.dkr.ecr.us-east-1.amazonaws.com/mno-group-dev-employee-directory:${{ github.sha }}
