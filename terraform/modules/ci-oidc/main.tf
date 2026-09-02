@@ -30,7 +30,7 @@ locals {
 data "aws_iam_policy_document" "trust" {
   statement {
     effect  = "Allow"
-    actions = ["sts:AssumeRoleWithWebIdentity"]
+    actions = ["sts:AssumeRoleWithWebIdentity","sts:TagSession"]
 
     principals {
       type        = "Federated"
