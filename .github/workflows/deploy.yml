@@ -1,0 +1,60 @@
+# ==============================================================================
+# Terraform Plan (dev)
+# ==============================================================================
+# Runs on PRs that touch Terraform code under terraform/. Plans against the
+# dev environment so reviewers see the infra diff before merge — no apply,
+# read-only.
+#
+# Auth matches ci.yml/promote.yml: GitHub OIDC via the role from
+# terraform/modules/ci-oidc, stored as the repo variable AWS_OIDC_ROLE_ARN
+# (Settings → Secrets and variables → Actions → Variables). Same repo, same
+# role — no separate trust policy needed.
+# ==============================================================================
+
+name: Terraform Plan
+
+on:
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - "terraform/environments/**"
+      - "terraform/modules/**"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform-plan:
+    name: Terraform Plan (dev)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform/environments/dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.11"
+
+      - name: Terraform fmt check
+        run: terraform fmt -check -recursive
+        working-directory: terraform
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: terraform plan -input=false -var-file=dev.tfvars

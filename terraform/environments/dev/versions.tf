@@ -23,4 +23,12 @@ terraform {
       version = "~> 4.0"
     }
   }
+
+  #  backend "s3" {
+  #   bucket         = "xyz-company-tfstate-rasheed28aug2026"
+  #   key            = "env/dev/terraform.tfstate"
+  #   region         = "us-east-1"
+  #   dynamodb_table = "xyz-company-tfstate-lock"
+  #   encrypt        = true
+  # }
 }
