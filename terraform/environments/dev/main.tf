@@ -121,7 +121,8 @@ module "notifications" {
 module "ci_oidc" {
   source              = "../../modules/ci-oidc"
   github_org          = "abdul-rasheed2023"
+  github_org_id       = "148262269"
   github_repo         = "EmployeeDirectory"
+  github_repo_id      = "1341415007"
   ecr_repository_arns = [module.ecr.repository_arn]
-
 }

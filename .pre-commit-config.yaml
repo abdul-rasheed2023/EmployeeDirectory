@@ -1,0 +1,20 @@
+repos:
+  - repo: local
+    hooks:
+      - id: dotnet-format
+        name: dotnet format
+        entry: dotnet format --no-restore
+        language: system
+        files: \.(cs|csproj)$
+        pass_filenames: false
+      - id: dotnet-build
+        name: dotnet build
+        entry: dotnet build --no-restore
+        language: system
+        files: \.(cs|csproj)$
+        pass_filenames: false
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
