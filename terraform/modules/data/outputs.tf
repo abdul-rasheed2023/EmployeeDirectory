@@ -22,3 +22,7 @@ output "rds_master_user_secret_arn" {
   description = "Secrets Manager ARN holding the RDS master credentials (managed by AWS, rotatable)"
   value       = aws_db_instance.mysql_db.master_user_secret[0].secret_arn
 }
+output "data_protection_secret_arn" {
+  description = "Secrets Manager ARN for the Data Protection key ring — needed by the app-irsa module's IAM policy"
+  value       = aws_secretsmanager_secret.data_protection_keys.arn
+}

@@ -31,11 +31,6 @@ resource "aws_instance" "bastion" {
   tags = merge(var.common_tags, { Name = "${var.name_prefix}-bastion-host" })
 }
 
-#resource "aws_instance" "bastion" {
-  # ... existing config ...
- # iam_instance_profile = aws_iam_instance_profile.bastion.name
-#}
-
 resource "aws_iam_instance_profile" "bastion" {
   name = "${var.name_prefix}-bastion-profile"
   role = aws_iam_role.bastion.name

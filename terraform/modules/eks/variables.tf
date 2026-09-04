@@ -56,7 +56,7 @@ variable "enabled_cluster_log_types" {
 variable "node_instance_types" {
   type        = list(string)
   description = "EC2 instance types for the managed node group"
-  default     = ["t3.medium"]
+  default     = ["t3.micro"]
 }
 
 variable "capacity_type" {

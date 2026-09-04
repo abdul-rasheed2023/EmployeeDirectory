@@ -1,11 +1,11 @@
 # ==============================================================================
 # DEV ENVIRONMENT
 # Wires the centralized modules together for the dev environment. This file
-# should stay thin — resource logic lives in modules/, this just supplies
+# should stay thin - resource logic lives in modules/, this just supplies
 # environment-specific values and connects module outputs to module inputs.
 #
 # App tier: originally EC2/ASG behind an ALB (modules/compute + loadbalancer),
-# retired in favor of EKS (modules/eks) — the old modules are left in the repo
+# retired in favor of EKS (modules/eks) - the old modules are left in the repo
 # for reference but are no longer wired in here. compute/ now only builds the
 # bastion host.
 # ==============================================================================
@@ -86,6 +86,17 @@ module "eks" {
   # DEV/POC ONLY: leaves the API endpoint open to 0.0.0.0/0 (module default).
   # Lock public_access_cidrs down to your own IP for anything beyond a short
   # provision-verify-destroy test.
+}
+
+module "lb_controller_irsa" {
+  source = "../../modules/lb-controller-irsa"
+  name_prefix        = local.name_prefix
+  common_tags        = local.common_tags
+  oidc_provider_arn  = module.eks.oidc_provider_arn
+  oidc_provider_url  = module.eks.oidc_provider_url
+  # namespace / service_account_name left at module defaults
+  # (kube-system / aws-load-balancer-controller) — matches the
+  # Helm chart's default install location.
 }
 
 module "ecr" {

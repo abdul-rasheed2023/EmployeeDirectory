@@ -41,7 +41,7 @@ output "sns_topic_arn" {
 }
 
 output "ecr_repository_url" {
-  description = "ECR repository URL — use this in CI/CD pipelines to push images"
+  description = "ECR repository URL - use this in CI/CD pipelines to push images"
   value       = module.ecr.repository_url
 }
 
@@ -61,4 +61,11 @@ output "ci_oidc_role_arn" {
 
 output "oidc_provider_arn" {
   value = module.ci_oidc.oidc_provider_arn
+}
+output "lb_controller_role_arn" {
+  description = "Set as serviceAccount.annotations.eks.amazonaws.com/role-arn in the AWS Load Balancer Controller Helm values"
+  value       = module.lb_controller_irsa.role_arn
+}
+output "aws_region" {
+  value = var.aws_region
 }

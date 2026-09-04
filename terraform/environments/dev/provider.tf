@@ -8,7 +8,7 @@
 #
 # NOTE: DynamoDB-based locking (the `dynamodb_table` argument) is the older
 # approach and is now deprecated by Terraform in favor of `use_lockfile`.
-# The bootstrap/ project still creates a DynamoDB table — that was the
+# The bootstrap/ project still creates a DynamoDB table - that was the
 # standard pattern until recently and is worth knowing, but this project
 # uses the current recommended S3-native locking instead. Requires
 # Terraform >= 1.11.
@@ -20,7 +20,7 @@
 #      terraform init
 #      Answer "yes" when asked to copy existing state to the new backend.
 #
-# NOTE: this block cannot use variables — backend config is evaluated before
+# NOTE: this block cannot use variables - backend config is evaluated before
 # any variables are known, so the values must be hardcoded here.
 # ==============================================================================
 
