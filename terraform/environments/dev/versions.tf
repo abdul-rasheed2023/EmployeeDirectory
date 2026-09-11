@@ -22,6 +22,14 @@ terraform {
       source  = "hashicorp/tls"
       version = "~> 4.0"
     }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.31"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.14"
+    }
   }
 
   #  backend "s3" {

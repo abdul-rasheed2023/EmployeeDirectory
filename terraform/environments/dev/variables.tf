@@ -55,7 +55,10 @@ variable "kubernetes_version" {
 variable "eks_node_instance_types" {
   type        = list(string)
   description = "EC2 instance types for the EKS managed node group"
-  default     = ["t3.micro"]
+  # m7i-flex.large: 2 vCPU / 8 GiB RAM, Intel general-purpose baseline-
+  # performance instance. Comfortably clears the AL2023/EKS 1.33 kubelet +
+  # system-reservation floor that made t3.micro risky.
+  default     = ["m7i-flex.large"]
 }
 
 variable "bastion_instance_type" {
@@ -88,4 +91,8 @@ variable "eks_node_desired_size" {
   default     = 2
 }
 
-
+# Inside variables.tf
+variable "image_tag" {
+  type        = string
+  description = "The specific container image tag to deploy"
+}

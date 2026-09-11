@@ -41,3 +41,14 @@ variable "github_repo_id" {
   type        = string
   default     = "1341415007"
 }
+
+variable "grant_terraform_apply_permissions" {
+  description = "If true, attach PowerUserAccess + a scoped IAM-management statement so this role can run a full terraform apply, not just push to ECR"
+  type        = bool
+  default     = true
+}
+
+variable "name_prefix_for_iam_scope" {
+  description = "Resource-name prefix (e.g. \"mno-group-dev\") used to scope the IAM-management statement to only roles/policies this project creates, rather than every role in the account"
+  type        = string
+}

@@ -36,6 +36,7 @@ data "aws_iam_policy_document" "trust" {
     effect  = "Allow"
     actions = ["sts:AssumeRoleWithWebIdentity","sts:TagSession"]
 
+
     principals {
       type        = "Federated"
       identifiers = [local.oidc_provider_arn]
@@ -93,4 +94,84 @@ resource "aws_iam_role_policy" "ecr_push" {
   name   = "ecr-push-only"
   role   = aws_iam_role.github_actions_ecr_push.id
   policy = data.aws_iam_policy_document.ecr_push.json
+}
+
+# ==============================================================================
+# TERRAFORM APPLY PERMISSIONS
+# This role is now used by CI to run full `terraform apply` — provisioning
+# VPC/EKS/RDS/S3/DynamoDB/SNS/Lambda/Secrets Manager, not just pushing images.
+# PowerUserAccess covers those services but explicitly excludes IAM (and
+# Organizations), so it's paired with a scoped IAM statement below for the
+# role/policy/OIDC-provider lifecycle actions this project's modules need
+# (iam, eks, app-irsa, lb-controller-irsa, ci-oidc itself).
+#
+# CAVEAT: PowerUserAccess is broad — appropriate for this dev/POC stack given
+# the trust policy already restricts assumption to this exact repo+branch,
+# but a production setup would replace it with a hand-scoped policy limited
+# to the specific resource types/ARNs this Terraform config touches.
+# ==============================================================================
+
+resource "aws_iam_role_policy_attachment" "power_user" {
+  count      = var.grant_terraform_apply_permissions ? 1 : 0
+  role       = aws_iam_role.github_actions_ecr_push.name
+  policy_arn = "arn:aws:iam::aws:policy/PowerUserAccess"
+}
+
+data "aws_iam_policy_document" "iam_management" {
+  statement {
+    sid    = "IAMRoleAndPolicyLifecycle"
+    effect = "Allow"
+    actions = [
+      "iam:CreateRole",
+      "iam:DeleteRole",
+      "iam:GetRole",
+      "iam:UpdateRole",
+      "iam:UpdateAssumeRolePolicy",
+      "iam:TagRole",
+      "iam:UntagRole",
+      "iam:ListRolePolicies",
+      "iam:ListAttachedRolePolicies",
+      "iam:ListInstanceProfilesForRole",
+      "iam:PutRolePolicy",
+      "iam:DeleteRolePolicy",
+      "iam:GetRolePolicy",
+      "iam:AttachRolePolicy",
+      "iam:DetachRolePolicy",
+      "iam:CreatePolicy",
+      "iam:DeletePolicy",
+      "iam:GetPolicy",
+      "iam:GetPolicyVersion",
+      "iam:ListPolicyVersions",
+      "iam:CreatePolicyVersion",
+      "iam:DeletePolicyVersion",
+      "iam:TagPolicy",
+      "iam:UntagPolicy",
+      "iam:PassRole",
+    ]
+    resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.name_prefix_for_iam_scope}*",
+                 "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.name_prefix_for_iam_scope}*"]
+  }
+
+  statement {
+    sid    = "OIDCProviderLifecycle"
+    effect = "Allow"
+    actions = [
+      "iam:CreateOpenIDConnectProvider",
+      "iam:DeleteOpenIDConnectProvider",
+      "iam:GetOpenIDConnectProvider",
+      "iam:TagOpenIDConnectProvider",
+      "iam:UpdateOpenIDConnectProviderThumbprint",
+      "iam:AddClientIDToOpenIDConnectProvider",
+      "iam:ListOpenIDConnectProviders",
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "iam_management" {
+  count  = var.grant_terraform_apply_permissions ? 1 : 0
+  
+  name   = "terraform-iam-management"
+  role   = aws_iam_role.github_actions_ecr_push.id
+  policy = data.aws_iam_policy_document.iam_management.json
 }

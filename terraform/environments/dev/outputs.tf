@@ -63,9 +63,14 @@ output "oidc_provider_arn" {
   value = module.ci_oidc.oidc_provider_arn
 }
 output "lb_controller_role_arn" {
-  description = "Set as serviceAccount.annotations.eks.amazonaws.com/role-arn in the AWS Load Balancer Controller Helm values"
+  description = "IAM role assumed by the AWS Load Balancer Controller pod via IRSA — wired automatically into the helm_release.aws_lb_controller resource"
   value       = module.lb_controller_irsa.role_arn
 }
 output "aws_region" {
   value = var.aws_region
+}
+
+output "app_url" {
+  description = "ALB hostname the ingress provisions. Empty until the load balancer controller finishes reconciling — re-run `terraform output app_url` a minute or two after apply if this shows blank."
+  value       = try(kubernetes_ingress_v1.employee_directory.status[0].load_balancer[0].ingress[0].hostname, "")
 }
