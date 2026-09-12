@@ -1,4 +1,4 @@
-﻿output "repository_url" {
+output "repository_url" {
   description = "ECR repository URL for pushing images (used in CI/CD pipeline)"
   value       = aws_ecr_repository.employee_directory.repository_url
 }

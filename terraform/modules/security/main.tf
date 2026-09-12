@@ -23,17 +23,17 @@ resource "aws_security_group" "bastion" {
 resource "aws_vpc_security_group_ingress_rule" "bastion_ssh" {
   security_group_id = aws_security_group.bastion.id
   description       = "Allow SSH from your administrator IP address"
-  from_port          = 22
-  to_port            = 22
-  ip_protocol        = "tcp"
-  cidr_ipv4          = var.my_ip
+  from_port         = 22
+  to_port           = 22
+  ip_protocol       = "tcp"
+  cidr_ipv4         = var.my_ip
 }
 
 resource "aws_vpc_security_group_egress_rule" "bastion_all" {
   security_group_id = aws_security_group.bastion.id
   description       = "Allow bastion to communicate outbound inside the VPC"
-  ip_protocol        = "-1"
-  cidr_ipv4          = "0.0.0.0/0"
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
 }
 
 
@@ -47,8 +47,8 @@ resource "aws_security_group" "rds" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "rds_from_eks" {
-  security_group_id           = aws_security_group.rds.id
-  description                 = "Allow MySQL traffic from EKS nodes/pods"
+  security_group_id            = aws_security_group.rds.id
+  description                  = "Allow MySQL traffic from EKS nodes/pods"
   from_port                    = 3306
   to_port                      = 3306
   ip_protocol                  = "tcp"

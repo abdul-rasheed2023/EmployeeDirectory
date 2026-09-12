@@ -62,18 +62,18 @@ resource "aws_db_subnet_group" "rds_subnets" {
 
 
 resource "aws_db_instance" "mysql_db" {
-  identifier              = "${var.name_prefix}-profile-db"
-  engine                  = "mysql"
-  engine_version          = "8.4"
-  instance_class          = "db.t3.micro"
-  allocated_storage            = 20
-  max_allocated_storage        = 100
-  db_name                      = "xyz_company_db"
-  username                     = "admin"
-  manage_master_user_password  = true
-  db_subnet_group_name         = aws_db_subnet_group.rds_subnets.name
-  vpc_security_group_ids       = [var.rds_sg_id]
-  skip_final_snapshot          = true
+  identifier                  = "${var.name_prefix}-profile-db"
+  engine                      = "mysql"
+  engine_version              = "8.4"
+  instance_class              = "db.t3.micro"
+  allocated_storage           = 20
+  max_allocated_storage       = 100
+  db_name                     = "xyz_company_db"
+  username                    = "admin"
+  manage_master_user_password = true
+  db_subnet_group_name        = aws_db_subnet_group.rds_subnets.name
+  vpc_security_group_ids      = [var.rds_sg_id]
+  skip_final_snapshot         = true
 
   tags = merge(var.common_tags, { Name = "${var.name_prefix}-profile-mysql-instance" })
 }
@@ -86,5 +86,5 @@ resource "aws_secretsmanager_secret" "data_protection_keys" {
   name                    = "${var.name_prefix}-dataprotection-keyring"
   description             = "ASP.NET Core Data Protection key ring — do not delete without a replacement plan, active user sessions depend on it"
   recovery_window_in_days = 7
-  tags = merge(var.common_tags, { Name = "${var.name_prefix}-dataprotection-keyring" })
+  tags                    = merge(var.common_tags, { Name = "${var.name_prefix}-dataprotection-keyring" })
 }

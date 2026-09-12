@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # ECR MODULE
 # Elastic Container Registry for storing Docker images built by the CI/CD
 # pipeline. Includes lifecycle policies to expire old images and scan-on-push
@@ -6,8 +6,8 @@
 # ==============================================================================
 
 resource "aws_ecr_repository" "employee_directory" {
-  name            = "${var.name_prefix}-employee-directory"
-  image_tag_mutability       = "MUTABLE"
+  name                 = "${var.name_prefix}-employee-directory"
+  image_tag_mutability = "MUTABLE"
   image_scanning_configuration { scan_on_push = true }
 
   encryption_configuration {
@@ -30,10 +30,10 @@ resource "aws_ecr_lifecycle_policy" "employee_directory" {
         rulePriority = 1
         description  = "Expire untagged images after 30 days"
         selection = {
-          tagStatus     = "untagged"
-          countType     = "sinceImagePushed"
-          countUnit     = "days"
-          countNumber   = 30
+          tagStatus   = "untagged"
+          countType   = "sinceImagePushed"
+          countUnit   = "days"
+          countNumber = 30
         }
         action = {
           type = "expire"
@@ -98,7 +98,7 @@ resource "aws_ecr_repository_policy" "allow_eks_nodes" {
           "ecr:BatchGetImage",
           "ecr:BatchCheckLayerAvailability"
         ]
-      }      
+      }
     ]
   })
 }

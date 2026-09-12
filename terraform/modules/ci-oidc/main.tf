@@ -1,5 +1,4 @@
-data "aws_caller_identity" "current" {
-}
+data "aws_caller_identity" "current" {}
 
 # GitHub's OIDC root cert thumbprint is stable and AWS no longer actually
 # validates against it (STS trusts GitHub's cert chain directly since 2023),
@@ -259,6 +258,17 @@ data "aws_iam_policy_document" "terraform_plan_readonly" {
       "sns:List*",
     ]
     resources = ["*"]
+  }
+
+  # terraform init/plan needs to actually read the state object itself —
+  # the s3:GetBucket*/ListBucket* actions above only cover bucket-level
+  # listing, not reading an object's contents. Scoped to just this bucket's
+  # objects (no DynamoDB lock table in use, so no dynamodb:* needed here).
+  statement {
+    sid       = "TerraformStateRead"
+    effect    = "Allow"
+    actions   = ["s3:GetObject"]
+    resources = ["arn:aws:s3:::${var.terraform_state_bucket}/*"]
   }
 }
 

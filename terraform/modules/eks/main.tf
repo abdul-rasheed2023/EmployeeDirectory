@@ -35,9 +35,9 @@ resource "aws_eks_cluster" "this" {
 
   vpc_config {
     subnet_ids              = concat(var.public_subnet_ids, var.private_app_subnet_ids)
-    endpoint_public_access   = var.endpoint_public_access
-    endpoint_private_access  = var.endpoint_private_access
-    public_access_cidrs      = var.public_access_cidrs
+    endpoint_public_access  = var.endpoint_public_access
+    endpoint_private_access = var.endpoint_private_access
+    public_access_cidrs     = var.public_access_cidrs
   }
 
   # Cluster logging is left off by default to avoid CloudWatch Logs cost on
