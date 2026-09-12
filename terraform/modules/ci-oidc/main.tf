@@ -28,7 +28,10 @@ locals {
 # sub claim format (immutable, GitHub default since July 2026):
   # repo:ORG@ORG_ID/REPO@REPO_ID:ref:refs/heads/BRANCH
   allowed_subs = [for ref in var.allowed_branch_refs : "repo:${var.github_org}@${var.github_org_id}/${var.github_repo}@${var.github_repo_id}:ref:${ref}"]
- 
+
+  # PR sub claim uses the same immutable owner/repo segment as branch refs;
+  # only the suffix differs (pull_request instead of ref:refs/heads/BRANCH).
+  pr_sub = "repo:${var.github_org}@${var.github_org_id}/${var.github_repo}@${var.github_repo_id}:pull_request"
 }
 
 data "aws_iam_policy_document" "trust" {
@@ -174,4 +177,86 @@ resource "aws_iam_role_policy" "iam_management" {
   name   = "terraform-iam-management"
   role   = aws_iam_role.github_actions_ecr_push.id
   policy = data.aws_iam_policy_document.iam_management.json
+}
+
+# ==============================================================================
+# READ-ONLY PLAN ROLE (PR-triggered `terraform plan`)
+# Separate from github_actions_ecr_push on purpose: that role carries
+# PowerUserAccess + IAM management and its trust policy is deliberately
+# restricted to push events on trusted branches (see allowed_branch_refs).
+# This role is scoped to PRs instead, so it needs its own, much narrower
+# trust condition and a read-only policy — a PR should never be able to
+# assume a role that can create/modify/delete infrastructure.
+# ==============================================================================
+
+data "aws_iam_policy_document" "trust_plan" {
+  count = var.create_plan_role ? 1 : 0
+
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+
+    principals {
+      type        = "Federated"
+      identifiers = [local.oidc_provider_arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = [local.pr_sub]
+    }
+  }
+}
+
+resource "aws_iam_role" "github_actions_terraform_plan" {
+  count              = var.create_plan_role ? 1 : 0
+  name               = var.plan_role_name
+  assume_role_policy = data.aws_iam_policy_document.trust_plan[0].json
+
+  max_session_duration = 3600
+}
+
+data "aws_iam_policy_document" "terraform_plan_readonly" {
+  count = var.create_plan_role ? 1 : 0
+
+  statement {
+    sid    = "TerraformPlanReadOnly"
+    effect = "Allow"
+    actions = [
+      "ec2:Describe*",
+      "eks:Describe*",
+      "eks:List*",
+      "rds:Describe*",
+      "rds:List*",
+      "iam:Get*",
+      "iam:List*",
+      "ecr:Describe*",
+      "ecr:List*",
+      "ecr:GetAuthorizationToken",
+      "elasticloadbalancing:Describe*",
+      "s3:GetBucket*",
+      "s3:ListBucket*",
+      "sts:GetCallerIdentity",
+      "kms:Describe*",
+      "kms:List*",
+      "logs:Describe*",
+      "sns:Get*",
+      "sns:List*",
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "terraform_plan_readonly" {
+  count  = var.create_plan_role ? 1 : 0
+  name   = "terraform-plan-readonly"
+  role   = aws_iam_role.github_actions_terraform_plan[0].id
+  policy = data.aws_iam_policy_document.terraform_plan_readonly[0].json
 }
