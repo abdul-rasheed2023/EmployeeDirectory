@@ -158,7 +158,14 @@ data "aws_iam_policy_document" "iam_management" {
     ]
     resources = [
       "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.name_prefix_for_iam_scope}*",
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.name_prefix_for_iam_scope}*"
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.name_prefix_for_iam_scope}*",
+      # The CI/plan roles themselves don't follow the project name_prefix
+      # (they're named github-actions-ecr-push / github-actions-terraform-plan),
+      # so they need to be listed explicitly — otherwise a state refresh of
+      # these two aws_iam_role resources 403s on iam:GetRole before any
+      # apply even runs, since their ARNs don't match the prefix pattern above.
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.role_name}",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.plan_role_name}"
     ]
   }
 
@@ -262,13 +269,23 @@ data "aws_iam_policy_document" "terraform_plan_readonly" {
 
   # terraform init/plan needs to actually read the state object itself —
   # the s3:GetBucket*/ListBucket* actions above only cover bucket-level
-  # listing, not reading an object's contents. Scoped to just this bucket's
-  # objects (no DynamoDB lock table in use, so no dynamodb:* needed here).
+  # listing, not reading an object's contents.
   statement {
     sid       = "TerraformStateRead"
     effect    = "Allow"
     actions   = ["s3:GetObject"]
     resources = ["arn:aws:s3:::${var.terraform_state_bucket}/*"]
+  }
+
+  # This backend uses Terraform's native S3 locking (a .tflock object, not
+  # DynamoDB), so even a read-only plan must write/delete that lock file
+  # around its run. Scoped to keys ending in .tflock specifically, so this
+  # otherwise-read-only role can never overwrite the actual .tfstate object.
+  statement {
+    sid       = "TerraformStateLockFile"
+    effect    = "Allow"
+    actions   = ["s3:PutObject", "s3:DeleteObject"]
+    resources = ["arn:aws:s3:::${var.terraform_state_bucket}/*.tflock"]
   }
 }
 
