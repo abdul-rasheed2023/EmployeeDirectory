@@ -16,12 +16,12 @@ locals {
   # AWS Load Balancer Controller. Only applied when eks_cluster_name is set.
   eks_public_tags = var.eks_cluster_name == "" ? {} : {
     "kubernetes.io/cluster/${var.eks_cluster_name}" = "shared"
-    "kubernetes.io/role/elb"                         = "1"
+    "kubernetes.io/role/elb"                        = "1"
   }
 
   eks_private_tags = var.eks_cluster_name == "" ? {} : {
     "kubernetes.io/cluster/${var.eks_cluster_name}" = "shared"
-    "kubernetes.io/role/internal-elb"                = "1"
+    "kubernetes.io/role/internal-elb"               = "1"
   }
 }
 
@@ -39,18 +39,18 @@ resource "aws_vpc" "main" {
 # --- Public subnets (ALB, bastion host) ---
 resource "aws_subnet" "public_1" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block               = var.public_subnet_cidrs[0]
-  availability_zone        = local.az_a
-  map_public_ip_on_launch  = true
+  cidr_block              = var.public_subnet_cidrs[0]
+  availability_zone       = local.az_a
+  map_public_ip_on_launch = true
 
   tags = merge(var.common_tags, local.eks_public_tags, { Name = "${var.name_prefix}-public-1" })
 }
 
 resource "aws_subnet" "public_2" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block               = var.public_subnet_cidrs[1]
-  availability_zone        = local.az_b
-  map_public_ip_on_launch  = true
+  cidr_block              = var.public_subnet_cidrs[1]
+  availability_zone       = local.az_b
+  map_public_ip_on_launch = true
 
   tags = merge(var.common_tags, local.eks_public_tags, { Name = "${var.name_prefix}-public-2" })
 }
