@@ -7,7 +7,6 @@
 **/.terraform/
 
 # Variable files that may contain secrets (db_password, notification_email)
-*.tfvars
 *.tfvars.json
 !*.tfvars.example
 *.tfstate.backup
@@ -34,7 +33,6 @@ tfplan
 *.tfstate
 *.tfstate.*
 .terraform/
-*.tfvars
 !*.tfvars.example
 crash.log
  errored.tfstate
