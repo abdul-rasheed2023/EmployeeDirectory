@@ -170,6 +170,40 @@ data "aws_iam_policy_document" "iam_management" {
   }
 
   statement {
+    sid    = "IAMInstanceProfileLifecycle"
+    effect = "Allow"
+    actions = [
+      "iam:CreateInstanceProfile",
+      "iam:DeleteInstanceProfile",
+      "iam:GetInstanceProfile",
+      "iam:AddRoleToInstanceProfile",
+      "iam:RemoveRoleFromInstanceProfile",
+      "iam:TagInstanceProfile",
+      "iam:UntagInstanceProfile",
+    ]
+    resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:instance-profile/${var.name_prefix_for_iam_scope}*"]
+  }
+
+  # EKS's CreateNodegroup call checks whether the AWS-managed service-linked
+  # role for node groups already exists before proceeding, which requires
+  # iam:GetRole on that role's path — this lives under aws-service-role/,
+  # outside the project name_prefix scope above, so it needs its own
+  # statement. CreateServiceLinkedRole is included so Terraform can create
+  # it on a first-ever run in this account, if it doesn't already exist.
+  statement {
+    sid    = "EKSServiceLinkedRole"
+    effect = "Allow"
+    actions = [
+      "iam:GetRole",
+      "iam:CreateServiceLinkedRole",
+    ]
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/eks-nodegroup.amazonaws.com/AWSServiceRoleForAmazonEKSNodegroup",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/eks.amazonaws.com/AWSServiceRoleForAmazonEKS",
+    ]
+  }
+
+  statement {
     sid    = "OIDCProviderLifecycle"
     effect = "Allow"
     actions = [
