@@ -269,13 +269,23 @@ data "aws_iam_policy_document" "terraform_plan_readonly" {
 
   # terraform init/plan needs to actually read the state object itself —
   # the s3:GetBucket*/ListBucket* actions above only cover bucket-level
-  # listing, not reading an object's contents. Scoped to just this bucket's
-  # objects (no DynamoDB lock table in use, so no dynamodb:* needed here).
+  # listing, not reading an object's contents.
   statement {
     sid       = "TerraformStateRead"
     effect    = "Allow"
     actions   = ["s3:GetObject"]
     resources = ["arn:aws:s3:::${var.terraform_state_bucket}/*"]
+  }
+
+  # This backend uses Terraform's native S3 locking (a .tflock object, not
+  # DynamoDB), so even a read-only plan must write/delete that lock file
+  # around its run. Scoped to keys ending in .tflock specifically, so this
+  # otherwise-read-only role can never overwrite the actual .tfstate object.
+  statement {
+    sid       = "TerraformStateLockFile"
+    effect    = "Allow"
+    actions   = ["s3:PutObject", "s3:DeleteObject"]
+    resources = ["arn:aws:s3:::${var.terraform_state_bucket}/*.tflock"]
   }
 }
 
