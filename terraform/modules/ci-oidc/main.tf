@@ -158,7 +158,14 @@ data "aws_iam_policy_document" "iam_management" {
     ]
     resources = [
       "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.name_prefix_for_iam_scope}*",
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.name_prefix_for_iam_scope}*"
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.name_prefix_for_iam_scope}*",
+      # The CI/plan roles themselves don't follow the project name_prefix
+      # (they're named github-actions-ecr-push / github-actions-terraform-plan),
+      # so they need to be listed explicitly — otherwise a state refresh of
+      # these two aws_iam_role resources 403s on iam:GetRole before any
+      # apply even runs, since their ARNs don't match the prefix pattern above.
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.role_name}",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.plan_role_name}"
     ]
   }
 
