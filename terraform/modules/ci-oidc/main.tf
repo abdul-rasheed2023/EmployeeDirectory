@@ -5,7 +5,7 @@ data "aws_caller_identity" "current" {}
 # but the API still requires a value in thumbprint_list.
 locals {
   github_oidc_thumbprint = "6938fd4d98bab03faadb97b34396831e3780aea0"
-  github_oidc_url         = "https://token.actions.githubusercontent.com"
+  github_oidc_url        = "https://token.actions.githubusercontent.com"
 }
 
 resource "aws_iam_openid_connect_provider" "github" {
@@ -22,10 +22,8 @@ data "aws_iam_openid_connect_provider" "github" {
 
 locals {
   oidc_provider_arn = var.create_oidc_provider ? aws_iam_openid_connect_provider.github[0].arn : data.aws_iam_openid_connect_provider.github[0].arn
-  
-  # sub claim format: repo:ORG/REPO:ref:refs/heads/BRANCH
-  
-# sub claim format (immutable, GitHub default since July 2026):
+
+  # sub claim format (immutable, GitHub default since July 2026):
   # repo:ORG@ORG_ID/REPO@REPO_ID:ref:refs/heads/BRANCH
   allowed_subs = [for ref in var.allowed_branch_refs : "repo:${var.github_org}@${var.github_org_id}/${var.github_repo}@${var.github_repo_id}:ref:${ref}"]
 
@@ -37,8 +35,7 @@ locals {
 data "aws_iam_policy_document" "trust" {
   statement {
     effect  = "Allow"
-    actions = ["sts:AssumeRoleWithWebIdentity","sts:TagSession"]
-
+    actions = ["sts:AssumeRoleWithWebIdentity", "sts:TagSession"]
 
     principals {
       type        = "Federated"
@@ -151,8 +148,10 @@ data "aws_iam_policy_document" "iam_management" {
       "iam:UntagPolicy",
       "iam:PassRole",
     ]
-    resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.name_prefix_for_iam_scope}*",
-                 "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.name_prefix_for_iam_scope}*"]
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.name_prefix_for_iam_scope}*",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.name_prefix_for_iam_scope}*"
+    ]
   }
 
   statement {
@@ -172,8 +171,8 @@ data "aws_iam_policy_document" "iam_management" {
 }
 
 resource "aws_iam_role_policy" "iam_management" {
-  count  = var.grant_terraform_apply_permissions ? 1 : 0
-  
+  count = var.grant_terraform_apply_permissions ? 1 : 0
+
   name   = "terraform-iam-management"
   role   = aws_iam_role.github_actions_ecr_push.id
   policy = data.aws_iam_policy_document.iam_management.json
