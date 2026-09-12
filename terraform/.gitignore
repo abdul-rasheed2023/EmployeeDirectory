@@ -31,6 +31,13 @@ terraform.rc
 tfplan
 *.tfplan
 *plan.txt
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfvars
+!*.tfvars.example
+crash.log
+ errored.tfstate
 
 # Ignore Terraform dependency lock files (Highly recommended for portfolio layouts)
 *.terraform.lock.hcl

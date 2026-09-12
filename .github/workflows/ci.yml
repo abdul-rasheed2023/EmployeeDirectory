@@ -79,8 +79,62 @@ jobs:
 
   deploy:
     needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: Production
+    defaults:
+      run:
+        working-directory: environments/dev
     steps:
-      - name: Deploy placeholder
-        run: echo "Deploying image employee-directory:${{ github.sha }} — no real target yet, this is the CD skeleton gate"
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.11.4"
+
+      - name: Terraform Init
+        run: terraform init
+
+      # Phase 1: infra only (VPC, EKS, RDS, IAM, ECR, etc). Targeted so the
+      # kubernetes_manifest resources below aren't planned yet — on a first
+      # run against a fresh account, the EKS cluster doesn't exist until
+      # this step completes, and the kubernetes provider can't reach a
+      # cluster that isn't there yet.
+      - name: Terraform Apply - Infra
+        run: |
+          terraform apply -auto-approve \
+            -var-file=dev.tfvars \
+            -var="image_tag=${{ github.sha }}" \
+            -target=module.network \
+            -target=module.security \
+            -target=module.data \
+            -target=module.iam \
+            -target=module.compute \
+            -target=module.eks \
+            -target=module.lb_controller_irsa \
+            -target=module.ecr \
+            -target=module.app_irsa \
+            -target=module.notifications \
+            -target=module.ci_oidc
+
+      # Phase 2: full apply. Infra already exists (or was a no-op above), so
+      # the kubernetes provider can now reach the cluster to apply the
+      # ServiceAccount, Deployment, and Service manifests.
+      - name: Terraform Apply - Full (incl. app manifests)
+        run: |
+          terraform apply -auto-approve \
+            -var-file=dev.tfvars \
+            -var="image_tag=${{ github.sha }}"
+
+      - name: Verify rollout
+        run: |
+          aws eks update-kubeconfig --name mno-group-dev-eks --region us-east-1
+          kubectl rollout status deployment/employee-directory --timeout=180s
+          kubectl get pods -o wide
