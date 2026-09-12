@@ -58,7 +58,7 @@ variable "eks_node_instance_types" {
   # m7i-flex.large: 2 vCPU / 8 GiB RAM, Intel general-purpose baseline-
   # performance instance. Comfortably clears the AL2023/EKS 1.33 kubelet +
   # system-reservation floor that made t3.micro risky.
-  default     = ["m7i-flex.large"]
+  default = ["m7i-flex.large"]
 }
 
 variable "bastion_instance_type" {
