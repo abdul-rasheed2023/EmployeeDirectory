@@ -70,3 +70,9 @@ variable "plan_role_name" {
   type        = string
   default     = "github-actions-terraform-plan"
 }
+
+variable "terraform_state_bucket" {
+  description = "Name of the S3 bucket holding Terraform state, so the plan role can be granted scoped read access to it (no DynamoDB lock table in use)"
+  type        = string
+  default     = "xyz-company-tfstate-rasheed28aug2026"
+}
