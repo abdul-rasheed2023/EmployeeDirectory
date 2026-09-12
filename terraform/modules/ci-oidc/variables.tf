@@ -14,6 +14,12 @@ variable "allowed_branch_refs" {
   default     = ["refs/heads/dev", "refs/heads/main"]
 }
 
+variable "allowed_environments" {
+  description = "GitHub Environment names (as set in a job's `environment:` key) allowed to assume the role. Jobs bound to an environment get a sub claim shaped repo:ORG@ID/REPO@ID:environment:NAME instead of a branch-ref sub, so these need to be listed separately (e.g. [\"Production\", \"Staging\"] for ci.yml's deploy job and promote.yml)."
+  type        = list(string)
+  default     = ["Production", "Staging"]
+}
+
 variable "ecr_repository_arns" {
   description = "ARNs of ECR repos CI is allowed to push to"
   type        = list(string)

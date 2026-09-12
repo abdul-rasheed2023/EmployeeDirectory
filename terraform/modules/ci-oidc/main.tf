@@ -30,6 +30,14 @@ locals {
   # PR sub claim uses the same immutable owner/repo segment as branch refs;
   # only the suffix differs (pull_request instead of ref:refs/heads/BRANCH).
   pr_sub = "repo:${var.github_org}@${var.github_org_id}/${var.github_repo}@${var.github_repo_id}:pull_request"
+
+  # Jobs that specify `environment:` (e.g. ci.yml's `deploy` job, all of
+  # promote.yml) get a sub claim shaped differently from a plain branch push:
+  # repo:ORG@ID/REPO@ID:environment:ENV_NAME — the ref:refs/heads/BRANCH
+  # subs above never match these regardless of which branch triggered them,
+  # so they need to be allowed explicitly, one per GitHub Environment name
+  # actually used in a `environment:` key across the workflows.
+  allowed_env_subs = [for env in var.allowed_environments : "repo:${var.github_org}@${var.github_org_id}/${var.github_repo}@${var.github_repo_id}:environment:${env}"]
 }
 
 data "aws_iam_policy_document" "trust" {
@@ -51,7 +59,7 @@ data "aws_iam_policy_document" "trust" {
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = local.allowed_subs
+      values   = concat(local.allowed_subs, local.allowed_env_subs)
     }
   }
 }
