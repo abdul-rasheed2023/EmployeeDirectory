@@ -1,4 +1,5 @@
-data "aws_caller_identity" "current" {}
+data "aws_caller_identity" "current" {
+}
 
 # GitHub's OIDC root cert thumbprint is stable and AWS no longer actually
 # validates against it (STS trusts GitHub's cert chain directly since 2023),
