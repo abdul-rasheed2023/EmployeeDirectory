@@ -77,14 +77,6 @@ resource "aws_db_instance" "mysql_db" {
 
   tags = merge(var.common_tags, { Name = "${var.name_prefix}-profile-mysql-instance" })
 }
-# --- Secrets Manager: ASP.NET Core Data Protection key ring ---
-# Empty container at creation; the app writes/reads key XML into this at
-# runtime via the Secrets Manager Data Protection provider. Needed so keys
-# survive pod restarts across a multi-pod EKS deployment — local-disk keys
-# (the default) invalidate every user session on every pod restart.
-resource "aws_secretsmanager_secret" "data_protection_keys" {
-  name                    = "${var.name_prefix}-dataprotection-keyring"
-  description             = "ASP.NET Core Data Protection key ring — do not delete without a replacement plan, active user sessions depend on it"
-  recovery_window_in_days = 0
-  tags                    = merge(var.common_tags, { Name = "${var.name_prefix}-dataprotection-keyring" })
-}
+
+
+

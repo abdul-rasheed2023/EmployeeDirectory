@@ -34,7 +34,9 @@
 
   <ItemGroup>
     <!-- EF Core + MySQL (Pomelo is the community provider Amazon RDS MySQL guides commonly point to) -->
+    <PackageReference Include="Amazon.AspNetCore.DataProtection.SSM" Version="4.0.3" />
     <PackageReference Include="AWSSDK.S3" Version="4.0.102.3" />
+    <PackageReference Include="AWSSDK.SecurityToken" Version="4.0.100.13" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
       <PrivateAssets>all</PrivateAssets>

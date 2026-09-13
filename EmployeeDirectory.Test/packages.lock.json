@@ -80,6 +80,16 @@
         "resolved": "2.8.2",
         "contentHash": "vm1tbfXhFmjFMUmS4M0J0ASXz3/U5XvXBa6DOQUL3fEz4Vt6YPhv+ESCarx6M6D+9kJkJYZKCNvJMas1+nVfmQ=="
       },
+      "Amazon.AspNetCore.DataProtection.SSM": {
+        "type": "Transitive",
+        "resolved": "4.0.3",
+        "contentHash": "eFKD6jR06Jbby1i+m8W1A8lDi8dR0tN2OJhQhu8NJNVq4B1HXQNq7fC9olg2Axl8vuDfsviEqbjuFKUkuG3qEg==",
+        "dependencies": {
+          "AWSSDK.Extensions.NETCore.Setup": "4.0.3.25",
+          "AWSSDK.SimpleSystemsManagement": "4.0.7.3",
+          "Microsoft.AspNetCore.DataProtection": "8.0.26"
+        }
+      },
       "AspNetCore.HealthChecks.MySql": {
         "type": "Transitive",
         "resolved": "8.0.1",
@@ -91,8 +101,8 @@
       },
       "AWSSDK.Core": {
         "type": "Transitive",
-        "resolved": "4.0.102",
-        "contentHash": "sjkYreyNPlYTnAxdnqd3MBoeTNZHXOzV9lKULS5VAn+6MJIqu87aZLlm56KhDANOBXRxwDJIW668ZlsFhaB6Zw=="
+        "resolved": "4.0.102.4",
+        "contentHash": "cFMZnb05RV290HDdybtgR5b/ypkLekeaoHde4tiQHLmgegGLMmcEKsvThnLm1PJOeWSNFcBxzC5fomOvWiW24A=="
       },
       "AWSSDK.S3": {
         "type": "Transitive",
@@ -101,6 +111,46 @@
         "dependencies": {
           "AWSSDK.Core": "[4.0.102, 5.0.0)"
         }
+      },
+      "AWSSDK.SecurityToken": {
+        "type": "Transitive",
+        "resolved": "4.0.100.13",
+        "contentHash": "q47zl/drEJyDcwrTqty3LdQboDHcONiz4gkcqjp7AKqfN3qw9aHnYrO1x+INzM/W6nkeV5Wfjqrkri3nXTc0dw==",
+        "dependencies": {
+          "AWSSDK.Core": "[4.0.102.4, 5.0.0)"
+        }
+      },
+      "AWSSDK.SimpleSystemsManagement": {
+        "type": "Transitive",
+        "resolved": "4.0.7.3",
+        "contentHash": "wEaAauWCBQc/sPdNYgwDC+WPwgRuDHYWRzOEOdo4UktTi84hI31LqMuDLasEI/UVy/N9gJOS5v8XGqx1wUJCzw==",
+        "dependencies": {
+          "AWSSDK.Core": "[4.0.3.17, 5.0.0)"
+        }
+      },
+      "Microsoft.AspNetCore.Cryptography.Internal": {
+        "type": "Transitive",
+        "resolved": "8.0.26",
+        "contentHash": "v2y+Rk86RjlKEB7UG53Y538p0W9jItF0GS+cixl5x3UXEZ08P/Jja35G2CQLKkOgc9WIQSArw9gXmkGxHnDdWA=="
+      },
+      "Microsoft.AspNetCore.DataProtection": {
+        "type": "Transitive",
+        "resolved": "8.0.26",
+        "contentHash": "9PlFOXc8Fi2Hh7UPXW+/tbvDV5vjCnBo/cGEIeJA5J0I2Uxw2yLuBmBS3QTXkkMr4BTy1KL038pZIZc9GifwHw==",
+        "dependencies": {
+          "Microsoft.AspNetCore.Cryptography.Internal": "8.0.26",
+          "Microsoft.AspNetCore.DataProtection.Abstractions": "8.0.26",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.2",
+          "Microsoft.Extensions.Hosting.Abstractions": "8.0.1",
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
+          "Microsoft.Extensions.Options": "8.0.2",
+          "System.Security.Cryptography.Xml": "8.0.3"
+        }
+      },
+      "Microsoft.AspNetCore.DataProtection.Abstractions": {
+        "type": "Transitive",
+        "resolved": "8.0.26",
+        "contentHash": "AW8jPojKAFkIVsZUFQuoN/Q7UbQiCkPhxdgGDrqUitv/D0ns5qz1BrQRFjZGuXXnAlj4t7f0ZYgAz6l3MbjXCA=="
       },
       "Microsoft.AspNetCore.TestHost": {
         "type": "Transitive",
@@ -598,6 +648,19 @@
         "resolved": "1.6.0",
         "contentHash": "COC1aiAJjCoA5GBF+QKL2uLqEBew4JsCkQmoHKbN3TlOZKa2fKLz5CpiRQKDz0RsAOEGsVKqOD5bomsXq/4STQ=="
       },
+      "System.Security.Cryptography.Pkcs": {
+        "type": "Transitive",
+        "resolved": "8.0.1",
+        "contentHash": "CoCRHFym33aUSf/NtWSVSZa99dkd0Hm7OCZUxORBjRB16LNhIEOf8THPqzIYlvKM0nNDAPTRBa1FxEECrgaxxA=="
+      },
+      "System.Security.Cryptography.Xml": {
+        "type": "Transitive",
+        "resolved": "8.0.3",
+        "contentHash": "1cHAWDYwOyyoRy+nxS7/Ro/Zcio6i5yHoIJ6xUA+fU8lNu4yGQgja5dEovAxBVud3RnfwRVWOl0B2vr+9LP/mg==",
+        "dependencies": {
+          "System.Security.Cryptography.Pkcs": "8.0.1"
+        }
+      },
       "System.Text.Encodings.Web": {
         "type": "Transitive",
         "resolved": "10.0.0",
@@ -657,6 +720,8 @@
         "dependencies": {
           "AWSSDK.Extensions.NETCore.Setup": "[4.0.101, )",
           "AWSSDK.S3": "[4.0.102.3, )",
+          "AWSSDK.SecurityToken": "[4.0.100.13, )",
+          "Amazon.AspNetCore.DataProtection.SSM": "[4.0.3, )",
           "AspNetCore.HealthChecks.MySql": "[8.0.1, )",
           "Pomelo.EntityFrameworkCore.MySql": "[8.0.2, )",
           "Serilog.AspNetCore": "[10.0.0, )",

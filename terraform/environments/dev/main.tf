@@ -164,13 +164,13 @@ module "ecr" {
 module "app_irsa" {
   source = "../../modules/app-irsa"
 
-  name_prefix                = local.name_prefix
-  common_tags                = local.common_tags
-  oidc_provider_arn          = module.eks.oidc_provider_arn
-  oidc_provider_url          = module.eks.oidc_provider_url
-  s3_bucket_arn              = module.data.s3_bucket_arn
-  dynamodb_table_arn         = module.data.dynamodb_table_arn
-  data_protection_secret_arn = module.data.data_protection_secret_arn
+  name_prefix                   = local.name_prefix
+  common_tags                   = local.common_tags
+  oidc_provider_arn             = module.eks.oidc_provider_arn
+  oidc_provider_url             = module.eks.oidc_provider_url
+  s3_bucket_arn                 = module.data.s3_bucket_arn
+  dynamodb_table_arn            = module.data.dynamodb_table_arn
+  dataprotection_parameter_path = "/mno-group/dev/employee-directory/dataprotection-keys"
   # namespace / service_account_name left at module defaults
   # (default / employee-directory) — matches deployment.tftpl and
   # k8s/base/serviceaccount.yaml.
@@ -265,11 +265,6 @@ resource "kubernetes_deployment_v1" "employee_directory" {
             name  = "AWS_REGION"
             value = var.aws_region
           }
-          env {
-            name  = "DataProtection__SecretArn"
-            value = module.data.data_protection_secret_arn
-          }
-
           resources {
             requests = {
               cpu    = "100m"

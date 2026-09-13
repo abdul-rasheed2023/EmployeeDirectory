@@ -40,7 +40,8 @@ variable "dynamodb_table_arn" {
   description = "ARN of the DynamoDB image-metadata table"
 }
 
-variable "data_protection_secret_arn" {
+variable "dataprotection_parameter_path" {
   type        = string
-  description = "ARN of the Secrets Manager Data Protection key ring"
+  description = "SSM Parameter Store path prefix for the Data Protection key ring"
 }
+

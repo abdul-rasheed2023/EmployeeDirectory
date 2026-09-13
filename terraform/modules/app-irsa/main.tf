@@ -4,10 +4,13 @@
 # via OIDC federation (IRSA), scoped to exactly what the app needs:
 #   - S3: read/write employee photo objects
 #   - DynamoDB: read/write image metadata
-#   - Secrets Manager: read/write the Data Protection key ring (ASP.NET Core
-#     writes key XML into it at runtime, and needs to read it back)
+#   - SSM Parameter Store: read/write the Data Protection key ring (ASP.NET
+#     Core writes key XML into it at runtime, and needs to read it back)
 # Same trust-policy pattern as modules/lb-controller-irsa.
 # ==============================================================================
+
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
 
 data "aws_iam_policy_document" "trust" {
   statement {
@@ -76,11 +79,12 @@ data "aws_iam_policy_document" "app_access" {
     sid    = "DataProtectionKeyRingAccess"
     effect = "Allow"
     actions = [
-      "secretsmanager:GetSecretValue",
-      "secretsmanager:PutSecretValue",
-      "secretsmanager:DescribeSecret",
+      "ssm:GetParameter",
+      "ssm:GetParameters",
+      "ssm:GetParametersByPath",
+      "ssm:PutParameter",
     ]
-    resources = [var.data_protection_secret_arn]
+    resources = ["arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.dataprotection_parameter_path}*"]
   }
 }
 
@@ -95,3 +99,7 @@ resource "aws_iam_role_policy_attachment" "app_access" {
   role       = aws_iam_role.app.name
   policy_arn = aws_iam_policy.app_access.arn
 }
+
+
+
+

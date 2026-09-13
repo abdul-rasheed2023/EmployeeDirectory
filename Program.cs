@@ -1,7 +1,9 @@
+using Amazon.AspNetCore.DataProtection.SSM;
 using Amazon.S3;
 using EmployeeDirectory.Data;
 using EmployeeDirectory.Repositories;
 using EmployeeDirectory.Services;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using Serilog;
@@ -58,6 +60,7 @@ else
             tags: new[] { "ready" });
 }
 
+
 // --- AWS S3 client ---
 // No explicit credentials configured here on purpose: the AWS SDK's default
 // credential chain handles this correctly in every environment we care about —
@@ -67,6 +70,17 @@ else
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddScoped<IPhotoStorageService, S3PhotoStorageService>();
+
+// --- Data Protection key ring, shared across pod replicas ---
+// Without this, each pod generates its own ephemeral, unshared key ring.
+// When a GET (issues an antiforgery token) and the following POST land on
+// different pods behind the ALB, the receiving pod can't decrypt a token
+// encrypted by the other pod's key, producing an intermittent HTTP 400 on
+// forms like /Employees/Create. Persisting keys to Parameter Store gives
+// every replica the same key ring.
+builder.Services.AddDataProtection()
+    .SetApplicationName("EmployeeDirectory")
+    .PersistKeysToAWSSystemsManager("/mno-group/dev/employee-directory/dataprotection-keys");
 
 builder.Host.UseSerilog((context, config) => config
     .WriteTo.Console(new Serilog.Formatting.Json.JsonFormatter())
@@ -165,3 +179,4 @@ app.Run();
 
 // Expose Program for WebApplicationFactory in integration tests (top-level statements)
 public partial class Program { }
+
