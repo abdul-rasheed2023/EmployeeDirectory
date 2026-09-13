@@ -85,6 +85,6 @@ resource "aws_db_instance" "mysql_db" {
 resource "aws_secretsmanager_secret" "data_protection_keys" {
   name                    = "${var.name_prefix}-dataprotection-keyring"
   description             = "ASP.NET Core Data Protection key ring — do not delete without a replacement plan, active user sessions depend on it"
-  recovery_window_in_days = 7
+  recovery_window_in_days = 0
   tags                    = merge(var.common_tags, { Name = "${var.name_prefix}-dataprotection-keyring" })
 }
